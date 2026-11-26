@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Budget — AI 스마트 가계부</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app-shell">
+    <!-- 상단 헤더 -->
+    <header class="header">
+        <div class="header-top">
+            <div>
+                <h1>Smart Budget</h1>
+                <p class="subtitle">AI 재무 코칭 가계부</p>
+            </div>
+            <div class="month-picker">
+                <input type="month" id="yearMonthInput" aria-label="조회 연월" />
+                <button id="refreshBtn" class="btn btn-secondary btn-sm">조회</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 알림 메시지 -->
+    <div id="alertBox" class="alert hidden"></div>
+
+    <!-- 메인 콘텐츠 (탭별 1개씩 표시) -->
+    <main class="main-content">
+
+        <!-- 탭 1: 예산 -->
+        <section id="tab-budget" class="tab-panel active">
+            <div class="card overview-card">
+                <span class="overview-label">이번 달 남은 예산</span>
+                <strong id="overviewRemaining" class="overview-amount">-</strong>
+                <div class="overview-grid">
+                    <div>
+                        <span>월 예산</span>
+                        <strong id="overviewBudget">-</strong>
+                    </div>
+                    <div>
+                        <span>고정 지출</span>
+                        <strong id="overviewFixed">0원</strong>
+                    </div>
+                    <div>
+                        <span>변동 지출</span>
+                        <strong id="overviewTx">0원</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>월 예산 설정</h2>
+                <form id="budgetForm" class="stack-form">
+                    <input type="number" id="budgetAmount" placeholder="월 예산을 입력하세요 (원)" min="0" required />
+                    <button type="submit" class="btn btn-primary btn-full">예산 저장</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 탭 2: 변동 지출 (AI 문자 파싱 포함) -->
+        <section id="tab-transactions" class="tab-panel">
+            <div class="card">
+                <h2>AI 결제 문자 자동 채우기</h2>
+                <div class="ai-parse-box">
+                    <textarea id="rawSmsInput" rows="2" placeholder="[Web발신] 신한카드(1234) 승인 11/26 14:20 스타벅스 강남역점 6,500원 일시불"></textarea>
+                    <button type="button" id="parseSmsBtn" class="btn btn-ai btn-full">AI로 자동 채우기</button>
+                </div>
+
+                <h3 class="sub-heading">변동 지출 등록</h3>
+                <form id="transactionForm" class="stack-form">
+                    <input type="text" id="txTitle" placeholder="지출 항목 (예: 스타벅스)" required />
+                    <div class="form-row">
+                        <input type="number" id="txAmount" placeholder="금액 (원)" min="1" required />
+                        <select id="txCategory" required>
+                            <option value="FOOD">식비 (FOOD)</option>
+                            <option value="TRANSPORT">교통 (TRANSPORT)</option>
+                            <option value="SHOPPING">쇼핑 (SHOPPING)</option>
+                            <option value="CULTURE">여가 (CULTURE)</option>
+                            <option value="LIVING">생활비 (LIVING)</option>
+                            <option value="ETC">기타 (ETC)</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="date" id="txDate" required />
+                        <input type="text" id="txMemo" placeholder="메모 (선택)" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">지출 등록</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="list-header">
+                    <h2>이번 달 변동 지출</h2>
+                    <span>합계 <strong id="txTotalDisplay">0원</strong></span>
+                </div>
+                <ul id="transactionList" class="item-list"></ul>
+            </div>
+        </section>
+
+        <!-- 탭 3: 고정 지출 -->
+        <section id="tab-fixed" class="tab-panel">
+            <div class="card">
+                <h2>고정 지출 추가</h2>
+                <form id="fixedExpenseForm" class="stack-form">
+                    <input type="text" id="fixedTitle" placeholder="고정 지출명 (예: 넷플릭스, 월세)" required />
+                    <div class="form-row">
+                        <input type="number" id="fixedAmount" placeholder="금액 (원)" min="1" required />
+                        <input type="number" id="fixedBillingDay" placeholder="결제일 (1~31)" min="1" max="31" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">고정 지출 추가</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="list-header">
+                    <h2>등록된 고정 지출</h2>
+                    <span>합계 <strong id="fixedTotalDisplay">0원</strong></span>
+                </div>
+                <ul id="fixedExpenseList" class="item-list"></ul>
+            </div>
+        </section>
+
+        <!-- 탭 4: 구매 시뮬레이터 & AI 코치 -->
+        <section id="tab-simulator" class="tab-panel">
+            <div class="card card-highlight">
+                <h2>구매 시뮬레이터 &amp; AI 코치</h2>
+                <p class="card-desc">사려는 물건을 입력하면 남은 예산 분석과 Gemini 재무 조언을 받을 수 있어요.</p>
+                <form id="simulatorForm" class="stack-form">
+                    <input type="text" id="simItemName" placeholder="구매 예정 항목 (예: 겨울 코트)" required />
+                    <input type="number" id="simPlannedAmount" placeholder="금액 (원)" min="1" required />
+                    <div class="form-row">
+                        <button type="button" id="simOnlyBtn" class="btn btn-secondary btn-full">빠른 계산</button>
+                        <button type="submit" id="aiAdviceBtn" class="btn btn-primary btn-full">AI 조언 받기</button>
+                    </div>
+                </form>
+
+                <div id="simResult" class="sim-result hidden">
+                    <div class="sim-header">
+                        <span id="simStatusBadge" class="badge">SAFE</span>
+                        <span id="simAiTag" class="ai-tag hidden">Gemini AI</span>
+                    </div>
+                    <p id="simMessage" class="sim-message"></p>
+                    <div class="sim-metrics">
+                        <div><span>현재 남은 예산</span><strong id="mCurrentRemaining">-</strong></div>
+                        <div><span>구매 후 남은 예산</span><strong id="mAfterRemaining">-</strong></div>
+                        <div><span>남은 일수</span><strong id="mRemainingDays">-</strong></div>
+                        <div><span>하루 권장 지출액</span><strong id="mDailyAvailable">-</strong></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 하단 바텀 네비게이션 바 -->
+    <nav class="bottom-nav" aria-label="메인 메뉴">
+        <button type="button" class="nav-item active" data-tab="budget">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="M16 12h2" />
+            </svg>
+            <span>예산</span>
+        </button>
+        <button type="button" class="nav-item" data-tab="transactions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                <rect x="9" y="3" width="6" height="4" rx="1" />
+                <path d="M9 12h6M9 16h4" />
+            </svg>
+            <span>변동지출</span>
+        </button>
+        <button type="button" class="nav-item" data-tab="fixed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            <span>고정지출</span>
+        </button>
+        <button type="button" class="nav-item" data-tab="simulator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3l1.9 4.6L19 9.5l-4.2 3.2L16 18l-4-2.6L8 18l1.2-5.3L5 9.5l5.1-1.9L12 3z" />
+            </svg>
+            <span>AI 코치</span>
+        </button>
+    </nav>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
