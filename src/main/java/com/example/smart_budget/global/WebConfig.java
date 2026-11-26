@@ -14,13 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
-                        "http://localhost:5500",
-                        "http://127.0.0.1:5500",
-                        "http://localhost:5173",
-                        "http://localhost:3000",
-                        "http://localhost:63342" // IntelliJ 내장 서버
-                )
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
