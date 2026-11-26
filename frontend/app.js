@@ -1,4 +1,7 @@
-const API_BASE = "http://localhost:8080/api/v1";
+const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const API_BASE = isLocal
+    ? "http://localhost:8080/api/v1"
+    : "https://smart-budget-api-mui6.onrender.com/api/v1";
 
 const yearMonthInput = document.getElementById("yearMonthInput");
 const alertBox = document.getElementById("alertBox");
