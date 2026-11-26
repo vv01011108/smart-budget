@@ -309,7 +309,7 @@ async function loadFixedExpenses() {
 document.getElementById("fixedExpenseForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const payload = {
-        title: document.getElementById("fixedTitle").value.trim(),
+        name: document.getElementById("fixedTitle").value.trim(),
         amount: Number(document.getElementById("fixedAmount").value),
         billingDay: Number(document.getElementById("fixedBillingDay").value),
     };
