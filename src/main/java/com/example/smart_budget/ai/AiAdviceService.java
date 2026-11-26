@@ -29,7 +29,7 @@ public class AiAdviceService {
         } catch (IllegalStateException e) {
             // 3. 외부 AI API 장애·타임아웃 시 서버 에러 대신 기본 메시지로 대체(FallBack)
             log.warn("Gemini AI 코멘트 생성 실패 - 기본 메시지로 대체합니다. reason={}",  e.getMessage());
-            return new AiAdviceResponse(simulation, e.getMessage(), false);
+            return new AiAdviceResponse(simulation, simulation.message(), false);
         }
     }
 

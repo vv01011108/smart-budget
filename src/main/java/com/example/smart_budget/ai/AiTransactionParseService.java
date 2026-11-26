@@ -24,7 +24,7 @@ public class AiTransactionParseService {
 
     public ParsedTransactionResponse parse(TransactionParseRequest request) {
         String prompt = buildPrompt(request.rawText());
-        String jsonText = geminiClient.generateText(prompt);
+        String jsonText = geminiClient.generateJson(prompt);
 
         try {
             ParsedTransactionResponse parsed = objectMapper.readValue(

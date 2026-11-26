@@ -37,6 +37,10 @@ public class GeminiClient {
         return callGemini(GeminiRequest.ofJson(prompt));
     }
 
+    public String generateJson(String prompt) {
+        return callGemini(GeminiRequest.ofJson(prompt));
+    }
+
     public String callGemini(GeminiRequest request) {
         try {
             GeminiResponse response = restClient.post()
