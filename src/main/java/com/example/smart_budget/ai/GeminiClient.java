@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.time.Duration;
+import java.util.Base64;
 
 @Component
 public class GeminiClient {
@@ -58,5 +59,10 @@ public class GeminiClient {
         } catch (RestClientException e) {
             throw new IllegalStateException("AI API 호출에 실패했습니다: " + e.getMessage(), e);
         }
+    }
+
+    public String generateJsonWithImage(String prompt, byte[] imageBytes, String mimeType) {
+        String base64Data = Base64.getEncoder().encodeToString(imageBytes);
+        return callGemini(GeminiRequest.ofJsonWithImage(prompt, mimeType, base64Data));
     }
 }

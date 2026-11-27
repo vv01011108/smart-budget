@@ -245,6 +245,29 @@ input:focus, select:focus, textarea:focus {
     resize: vertical;
 }
 
+.ai-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+    font-size: 0.78rem;
+    color: #0f766e;
+}
+
+.ai-divider::before,
+.ai-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #99f6e4;
+}
+
+.btn-ai-outline {
+    background: #ffffff;
+    color: #0f766e;
+    border: 1px solid #0f766e;
+}
+
 /* 시뮬레이션 결과 */
 .sim-result {
     margin-top: 16px;

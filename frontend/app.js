@@ -54,9 +54,14 @@ function updateOverview() {
 
 // 공통 fetch 래퍼
 async function apiFetch(path, options = {}) {
+    const isFormData = options.body instanceof FormData;
+    const headers = isFormData
+        ? { ...options.headers }
+        : { "Content-Type": "application/json", ...options.headers };
+
     const response = await fetch(`${API_BASE}${path}`, {
-        headers: { "Content-Type": "application/json", ...options.headers },
         ...options,
+        headers,
     });
 
     if (response.status === 204) return null;
@@ -164,7 +169,15 @@ document.getElementById("simulatorForm").addEventListener("submit", async (e) =>
     }
 });
 
-// 3. AI 결제 문자 자동 파싱
+// 3. AI 결제 문자 & 이미지 자동 파싱
+function fillTransactionForm(parsed) {
+    document.getElementById("txTitle").value = parsed.title ?? "";
+    document.getElementById("txAmount").value = parsed.amount ?? "";
+    if (parsed.category) document.getElementById("txCategory").value = parsed.category;
+    if (parsed.transactionDate) document.getElementById("txDate").value = parsed.transactionDate;
+    document.getElementById("txMemo").value = parsed.memo ?? "";
+}
+
 document.getElementById("parseSmsBtn").addEventListener("click", async () => {
     const rawText = document.getElementById("rawSmsInput").value.trim();
     if (!rawText) return showAlert("결제 문자를 입력해 주세요.", "error");
@@ -178,21 +191,56 @@ document.getElementById("parseSmsBtn").addEventListener("click", async () => {
             method: "POST",
             body: JSON.stringify({ rawText }),
         });
-
-        document.getElementById("txTitle").value = parsed.title ?? "";
-        document.getElementById("txAmount").value = parsed.amount ?? "";
-        if (parsed.category) document.getElementById("txCategory").value = parsed.category;
-        if (parsed.transactionDate) document.getElementById("txDate").value = parsed.transactionDate;
-        document.getElementById("txMemo").value = parsed.memo ?? "";
-
+        fillTransactionForm(parsed);
         showAlert("AI가 결제 문자를 채웠습니다. 확인 후 등록해 주세요!");
     } catch (err) {
         showAlert(err.message, "error");
     } finally {
         btn.disabled = false;
-        btn.textContent = "AI로 자동 채우기";
+        btn.textContent = "문자로 자동 채우기";
     }
 });
+
+const receiptFileInput = document.getElementById("receiptFileInput");
+const receiptCameraInput = document.getElementById("receiptCameraInput");
+const uploadImageBtn = document.getElementById("uploadImageBtn");
+const cameraImageBtn = document.getElementById("cameraImageBtn");
+
+uploadImageBtn.addEventListener("click", () => receiptFileInput.click());
+cameraImageBtn.addEventListener("click", () => receiptCameraInput.click());
+
+async function handleReceiptImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    uploadImageBtn.disabled = true;
+    cameraImageBtn.disabled = true;
+    uploadImageBtn.textContent = "사진 분석 중...";
+    cameraImageBtn.textContent = "사진 분석 중...";
+
+    try {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const parsed = await apiFetch("/ai/parse-transaction/image", {
+            method: "POST",
+            body: formData,
+        });
+        fillTransactionForm(parsed);
+        showAlert("AI가 사진에서 지출 내역을 읽어왔습니다. 확인 후 등록해 주세요.");
+    } catch (err) {
+        showAlert(err.message, "error");
+    } finally {
+        uploadImageBtn.disabled = false;
+        cameraImageBtn.disabled = false;
+        uploadImageBtn.textContent = "사진 첨부";
+        cameraImageBtn.textContent = "사진 촬영";
+        event.target.value = "";
+    }
+}
+
+receiptFileInput.addEventListener("change", handleReceiptImage);
+receiptCameraInput.addEventListener("change", handleReceiptImage);
 
 // 4. 변동 지출 조회 / 등록 / 삭제
 async function loadTransactions() {

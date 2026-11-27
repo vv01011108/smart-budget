@@ -6,11 +6,10 @@ import com.example.smart_budget.ai.dto.TransactionParseRequest;
 import com.example.smart_budget.simulator.dto.SimulationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/ai")
@@ -32,5 +31,12 @@ public class AiController {
             @Valid @RequestBody TransactionParseRequest request
     ) {
         return ResponseEntity.ok(aiTransactionParseService.parse(request));
+    }
+
+    @PostMapping(value = "/parse-transaction/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ParsedTransactionResponse> parseTransactionImage(
+            @RequestParam("image")MultipartFile image
+    ) {
+        return ResponseEntity.ok(aiTransactionParseService.parseImage(image));
     }
 }

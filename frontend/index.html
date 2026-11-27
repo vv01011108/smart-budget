@@ -61,10 +61,19 @@
         <!-- 탭 2: 변동 지출 (AI 문자 파싱 포함) -->
         <section id="tab-transactions" class="tab-panel">
             <div class="card">
-                <h2>AI 결제 문자 자동 채우기</h2>
+                <h2>AI 자동 채우기 (문자 · 사진)</h2>
                 <div class="ai-parse-box">
                     <textarea id="rawSmsInput" rows="2" placeholder="[Web발신] 신한카드(1234) 승인 11/26 14:20 스타벅스 강남역점 6,500원 일시불"></textarea>
-                    <button type="button" id="parseSmsBtn" class="btn btn-ai btn-full">AI로 자동 채우기</button>
+                    <button type="button" id="parseSmsBtn" class="btn btn-ai btn-full">문자로 자동 채우기</button>
+
+                    <div class="ai-divider"><span>또는 영수증 · 결제 화면 사진</span></div>
+
+                    <input type="file" id="receiptFileInput" accept="image/*" hidden />
+                    <input type="file" id="receiptCameraInput" accept="image/*" capture="environment" hidden />
+                    <div class="form-row">
+                        <button type="button" id="uploadImageBtn" class="btn btn-ai-outline btn-full">사진 첨부</button>
+                        <button type="button" id="cameraImageBtn" class="btn btn-ai-outline btn-full">사진 촬영</button>
+                    </div>
                 </div>
 
                 <h3 class="sub-heading">변동 지출 등록</h3>
