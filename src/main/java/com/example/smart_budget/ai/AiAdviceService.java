@@ -17,7 +17,7 @@ public class AiAdviceService {
 
     private final SimulatorService simulatorService;
     private final GeminiClient geminiClient;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AiAdviceResponse getAdvice(SimulationRequest request) {
         // 1. 기존 시뮬레이터로 정확한 예산 수치 먼저 계산
